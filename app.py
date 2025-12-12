@@ -1,25 +1,16 @@
+import os
 from flask import Flask, request, jsonify
-from tensorflow.keras.models import load_model
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-import pandas as pd
 
 app = Flask(__name__)
-
-# Load the trained model
-model = load_model("stock_lstm.keras")
-
-# Example: scaler (fit on your training data)
-scaler = MinMaxScaler()
-# You should fit this on the same data used during training or save/load it.
-
-@app.route("/predict", methods=["POST"])
+@app.route('/')
+def home():
+    return "Stock Price Predictor is running!"
+@app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json["data"]  # expects last 60 prices
-    data = np.array(data).reshape(1, 60, 1)
-    scaled_pred = model.predict(data)
-    pred_price = scaler.inverse_transform(scaled_pred)
-    return jsonify({"predicted_price": float(pred_price[0,0])})
+    data = request.get_json()
+    sample_prediction = {"predicted_price": 100.0}
+    return jsonify(sample_prediction)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
